@@ -44,7 +44,10 @@ export function loadPersonaExtractSettings() {
 export function savePersonaExtractSettings(patch) {
   const key = LS_PREFIX + getPersonaKey();
   const cur = loadPersonaExtractSettings();
+
+  // ✅ 修复：必须用展开运算符
   const next = { ...cur, ...patch };
+
   localStorage.setItem(key, JSON.stringify(next));
   return next;
 }
