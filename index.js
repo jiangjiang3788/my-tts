@@ -1,6 +1,7 @@
+// index.js
 import { $ } from "./dom.js";
-import { log, logDebug } from "./logger.js";
-import { extensionName, extensionFolderPath } from "./constants.js";
+import { log, logDebug, logWarn, logError } from "./logger.js";
+import { extensionFolderPath } from "./constants.js";
 import { loadSettings } from "./settings.js";
 import { loadCustomVoices } from "./voices.js";
 import { setupMessageListener } from "./messageListener.js";
@@ -8,26 +9,205 @@ import { initUI } from "./ui.js";
 import { generateTTS } from "./tts.js";
 import { extension_settings } from "./context.js";
 
+/**
+ * 在云/本地不同壳里，settings 容器 id 可能不同，甚至不存在。
+ * 这里做多候选探测。
+ */
+function findSettingsContainer() {
+  const candidates = [
+    "#extensions_settings",      // 本地常见
+    "#extensionsSettings",
+    "#extensions_settings2",
+    "#settings_container",
+    "#settings",
+    ".extensions_settings",
+    ".settings",
+  ];
+
+  for (const sel of candidates) {
+    const $el = $(sel);
+    if ($el && $el.length) return $el;
+  }
+  return null;
+}
+
+function toast(type, msg, title = "my-tts") {
+  try {
+    if (window.toastr && typeof window.toastr[type] === "function") {
+      window.toastr[type](msg, title);
+      return;
+    }
+  } catch {}
+  // toastr 不存在也要能看到
+  if (type === "error") console.error(`【${title}】`, msg);
+  else if (type === "warning") console.warn(`【${title}】`, msg);
+  else console.log(`【${title}】`, msg);
+}
+
+function ensureFloatingSettingsUI(settingsHtml) {
+  // 避免重复插入
+  if (document.getElementById("mytts-floating-btn")) return;
+
+  const btn = document.createElement("button");
+  btn.id = "mytts-floating-btn";
+  btn.textContent = "my-tts 设置";
+  btn.style.cssText = [
+    "position:fixed",
+    "right:14px",
+    "bottom:14px",
+    "z-index:99999",
+    "padding:10px 12px",
+    "border-radius:10px",
+    "border:1px solid rgba(255,255,255,0.18)",
+    "background:rgba(0,0,0,0.55)",
+    "color:#fff",
+    "cursor:pointer",
+    "font-size:14px",
+  ].join(";");
+
+  const backdrop = document.createElement("div");
+  backdrop.id = "mytts-settings-backdrop";
+  backdrop.style.cssText = [
+    "position:fixed",
+    "inset:0",
+    "z-index:99998",
+    "display:none",
+    "background:rgba(0,0,0,0.5)",
+  ].join(";");
+
+  const modal = document.createElement("div");
+  modal.id = "mytts-settings-modal";
+  modal.style.cssText = [
+    "position:absolute",
+    "right:14px",
+    "bottom:60px",
+    "width:min(520px, calc(100vw - 28px))",
+    "max-height:min(80vh, 720px)",
+    "overflow:auto",
+    "border-radius:12px",
+    "border:1px solid rgba(255,255,255,0.18)",
+    "background:rgba(20,20,20,0.95)",
+    "padding:12px",
+  ].join(";");
+
+  const header = document.createElement("div");
+  header.style.cssText = "display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;gap:10px;";
+
+  const title = document.createElement("div");
+  title.textContent = "my-tts 设置（云端兜底面板）";
+  title.style.cssText = "color:#fff;font-weight:700;font-size:14px;opacity:0.95;";
+
+  const close = document.createElement("button");
+  close.textContent = "×";
+  close.style.cssText = [
+    "width:34px",
+    "height:34px",
+    "border-radius:10px",
+    "border:1px solid rgba(255,255,255,0.18)",
+    "background:rgba(255,255,255,0.08)",
+    "color:#fff",
+    "cursor:pointer",
+    "font-size:18px",
+    "line-height:1",
+  ].join(";");
+
+  const body = document.createElement("div");
+  body.style.cssText = "color:#fff;";
+
+  // 把 settingsHtml 放进去（保持你原来的 example.html）
+  body.innerHTML = settingsHtml;
+
+  header.appendChild(title);
+  header.appendChild(close);
+
+  modal.appendChild(header);
+  modal.appendChild(body);
+  backdrop.appendChild(modal);
+
+  document.body.appendChild(backdrop);
+  document.body.appendChild(btn);
+
+  const open = () => {
+    backdrop.style.display = "block";
+    // 重要：弹窗插入后再绑 UI 事件（否则找不到节点）
+    initUI();
+    toast("info", "已打开云端兜底设置面板（用于确认插件已运行）");
+  };
+
+  const hide = () => {
+    backdrop.style.display = "none";
+  };
+
+  btn.addEventListener("click", (e) => {
+    e.preventDefault();
+    e.stopPropagation();
+    open();
+  });
+
+  close.addEventListener("click", (e) => {
+    e.preventDefault();
+    e.stopPropagation();
+    hide();
+  });
+
+  backdrop.addEventListener("click", (e) => {
+    if (e.target === backdrop) hide();
+  });
+
+  document.addEventListener("keydown", (e) => {
+    if (e.key === "Escape") hide();
+  });
+
+  toast("warning", "未找到酒馆设置容器：已启用右下角“my-tts 设置”兜底按钮");
+  logWarn("Settings container not found, fallback floating settings enabled.");
+}
+
 jQuery(async () => {
-  // 1) 注入设置面板 HTML
-  const settingsHtml = await $.get(`${extensionFolderPath}/example.html`);
-  $("#extensions_settings").append(settingsHtml);
+  log("my-tts 启动：开始加载插件…");
+  toast("info", "插件启动：正在初始化…");
 
-  // 2) 初始化 UI 事件绑定
-  initUI();
+  try {
+    // 1) 读取设置面板 HTML
+    const settingsHtml = await $.get(`${extensionFolderPath}/example.html`);
 
-  // 3) 加载设置并刷新 UI
-  await loadSettings();
+    // 2) 找 settings 容器并注入
+    const $container = findSettingsContainer();
+    logDebug("Settings container probe result:", {
+      found: !!$container,
+      selector:
+        $container?.attr("id")
+          ? `#${$container.attr("id")}`
+          : ($container?.get?.(0)?.className ? `.${$container.get(0).className}` : "unknown"),
+      length: $container?.length || 0,
+    });
 
-  // 4) 拉取自定义音色并刷新下拉/列表
-  await loadCustomVoices();
+    if ($container && $container.length) {
+      $container.append(settingsHtml);
+      toast("success", "已注入设置面板到酒馆设置页");
+      log("设置面板已注入到 settings 容器内。");
+      // 注入到页面后再绑定事件
+      initUI();
+    } else {
+      // 云端兜底：浮动按钮 + 弹窗承载设置页
+      ensureFloatingSettingsUI(settingsHtml);
+    }
 
-  // 5) 设置消息监听（自动朗读）
-  setupMessageListener();
+    // 3) 加载设置并刷新 UI
+    await loadSettings();
 
-  log("硅基流动插件已加载");
-  log("自动朗读功能已启用，请在控制台查看调试信息");
-  logDebug("extension_settings:", extension_settings?.[extensionName]);
+    // 4) 拉取自定义音色并刷新下拉/列表
+    await loadCustomVoices();
+
+    // 5) 设置消息监听（自动朗读）
+    setupMessageListener();
+
+    toast("success", "插件已加载完成（控制台可看更多日志）");
+    log("硅基流动插件已加载");
+    logDebug("extension_settings:", extension_settings);
+  } catch (e) {
+    toast("error", `插件初始化失败：${e?.message || e}`);
+    logError("Plugin init failed:", e);
+  }
 });
 
 export { generateTTS };
