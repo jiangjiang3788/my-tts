@@ -19,7 +19,29 @@ export const defaultSettings = {
   generationFrequency: 5,
   autoPlay: true,
   autoPlayUser: false,
-  customVoices: []
+  customVoices: [],
+
+  // ✅ GitHub 更新检查（按文件变动/提交）
+  // 支持写法：
+  // - "owner/repo"
+  // - "https://github.com/jiangjiang3788/my-tts"
+  githubRepo: "jiangjiang3788/my-tts",
+  githubBranch: "main",
+  // 只检查该路径下文件变动（推荐填插件目录在仓库中的路径）
+  // 例： "scripts/extensions/third-party/my-tts"
+  githubPath: "",
+
+  // 自动检查更新
+  autoCheckUpdates: true,
+  // 自动检查间隔（小时）
+  updateCheckIntervalHours: 1,
+
+  // 记录本地“已安装提交 sha”（用于判断是否有新变动）
+  lastInstalledCommit: "",
+  // 最近一次自动检查时间戳
+  lastAutoCheckAt: 0,
+  // 最近一次看到的远端 sha（仅用于展示/调试）
+  lastRemoteCommit: ""
 };
 
 export const TTS_MODELS = {

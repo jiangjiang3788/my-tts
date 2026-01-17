@@ -8,6 +8,7 @@ import { setupMessageListener } from "./messageListener.js";
 import { initUI } from "./ui.js";
 import { generateTTS } from "./tts.js";
 import { extension_settings } from "./context.js";
+import { checkAndUpdateFromGithub } from "./updater.js";
 
 /**
  * 在云/本地不同壳里，settings 容器 id 可能不同，甚至不存在。
@@ -15,7 +16,7 @@ import { extension_settings } from "./context.js";
  */
 function findSettingsContainer() {
   const candidates = [
-    "#extensions_settings",      // 本地常见
+    "#extensions_settings",
     "#extensionsSettings",
     "#extensions_settings2",
     "#settings_container",
@@ -38,14 +39,12 @@ function toast(type, msg, title = "my-tts") {
       return;
     }
   } catch {}
-  // toastr 不存在也要能看到
   if (type === "error") console.error(`【${title}】`, msg);
   else if (type === "warning") console.warn(`【${title}】`, msg);
   else console.log(`【${title}】`, msg);
 }
 
 function ensureFloatingSettingsUI(settingsHtml) {
-  // 避免重复插入
   if (document.getElementById("mytts-floating-btn")) return;
 
   const btn = document.createElement("button");
@@ -113,8 +112,6 @@ function ensureFloatingSettingsUI(settingsHtml) {
 
   const body = document.createElement("div");
   body.style.cssText = "color:#fff;";
-
-  // 把 settingsHtml 放进去（保持你原来的 example.html）
   body.innerHTML = settingsHtml;
 
   header.appendChild(title);
@@ -129,7 +126,6 @@ function ensureFloatingSettingsUI(settingsHtml) {
 
   const open = () => {
     backdrop.style.display = "block";
-    // 重要：弹窗插入后再绑 UI 事件（否则找不到节点）
     initUI();
     toast("info", "已打开云端兜底设置面板（用于确认插件已运行）");
   };
@@ -185,10 +181,8 @@ jQuery(async () => {
       $container.append(settingsHtml);
       toast("success", "已注入设置面板到酒馆设置页");
       log("设置面板已注入到 settings 容器内。");
-      // 注入到页面后再绑定事件
       initUI();
     } else {
-      // 云端兜底：浮动按钮 + 弹窗承载设置页
       ensureFloatingSettingsUI(settingsHtml);
     }
 
@@ -200,6 +194,18 @@ jQuery(async () => {
 
     // 5) 设置消息监听（自动朗读）
     setupMessageListener();
+
+    // ✅ 6) 自动检查 GitHub 更新（按文件变动/提交）
+    // 注意：不会依赖 manifest version，只看 commit sha 是否变化
+    try {
+      const cfg = extension_settings?.["my-tts"] || {};
+      if (cfg.autoCheckUpdates === true) {
+        // 非强制：按间隔策略决定是否检查
+        await checkAndUpdateFromGithub({ silent: true, force: false });
+      }
+    } catch (e) {
+      logWarn("auto update check failed (ignored):", e);
+    }
 
     toast("success", "插件已加载完成（控制台可看更多日志）");
     log("硅基流动插件已加载");

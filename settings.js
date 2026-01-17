@@ -1,3 +1,4 @@
+// settings.js
 import { $ } from "./dom.js";
 import { extensionName, defaultSettings } from "./constants.js";
 import { extension_settings, saveSettingsDebounced } from "./context.js";
@@ -8,6 +9,13 @@ export async function loadSettings() {
 
   if (Object.keys(extension_settings[extensionName]).length === 0) {
     Object.assign(extension_settings[extensionName], defaultSettings);
+  } else {
+    // ✅ 兼容老用户：补齐新增字段
+    Object.assign(
+      extension_settings[extensionName],
+      { ...defaultSettings },
+      extension_settings[extensionName]
+    );
   }
 
   $("#siliconflow_api_key").val(extension_settings[extensionName].apiKey || "");
@@ -32,6 +40,19 @@ export async function loadSettings() {
   $("#auto_play_audio").prop("checked", extension_settings[extensionName].autoPlay !== false);
   $("#auto_play_user").prop("checked", extension_settings[extensionName].autoPlayUser === true);
 
+  // ✅ GitHub 更新设置
+  $("#github_repo").val(extension_settings[extensionName].githubRepo || "");
+  $("#github_branch").val(extension_settings[extensionName].githubBranch || "main");
+  $("#github_path").val(extension_settings[extensionName].githubPath || "");
+  $("#auto_check_updates").prop("checked", extension_settings[extensionName].autoCheckUpdates === true);
+  $("#update_check_interval").val(extension_settings[extensionName].updateCheckIntervalHours ?? 12);
+
+  // 展示当前已安装 commit（如果有）
+  const installed = extension_settings[extensionName].lastInstalledCommit || "";
+  const remote = extension_settings[extensionName].lastRemoteCommit || "";
+  if ($("#installed_commit").length) $("#installed_commit").text(installed ? installed.slice(0, 12) : "（未初始化）");
+  if ($("#remote_commit").length) $("#remote_commit").text(remote ? remote.slice(0, 12) : "—");
+
   updateVoiceOptions();
 }
 
@@ -54,6 +75,13 @@ export function saveSettings() {
 
   extension_settings[extensionName].autoPlay = $("#auto_play_audio").prop("checked");
   extension_settings[extensionName].autoPlayUser = $("#auto_play_user").prop("checked");
+
+  // ✅ GitHub 更新设置保存
+  extension_settings[extensionName].githubRepo = ($("#github_repo").val() || "").trim();
+  extension_settings[extensionName].githubBranch = ($("#github_branch").val() || "main").trim();
+  extension_settings[extensionName].githubPath = ($("#github_path").val() || "").trim();
+  extension_settings[extensionName].autoCheckUpdates = $("#auto_check_updates").prop("checked") === true;
+  extension_settings[extensionName].updateCheckIntervalHours = parseInt($("#update_check_interval").val() || "12", 10);
 
   saveSettingsDebounced();
 }
