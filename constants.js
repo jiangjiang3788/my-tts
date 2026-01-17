@@ -1,4 +1,6 @@
-export const extensionName = "extension";
+// constants.js
+// 这里的 extensionName 建议与扩展文件夹名、manifest.json 的 display_name 保持一致
+export const extensionName = "my-tts";
 export const extensionFolderPath = `scripts/extensions/third-party/${extensionName}`;
 
 export const defaultSettings = {
