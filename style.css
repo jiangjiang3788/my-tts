@@ -1,0 +1,303 @@
+/* 生图与语音功能插件 - 样式文件 */
+/* 避免影响全局样式 */
+
+/* 主插件容器 */
+.siliconflow-extension-settings .extension-block {
+    /* 不设置背景色，继承主题背景 */
+    border: 1px solid var(--SmartThemeBorderColor, #444);
+    border-radius: 8px;
+    padding: 15px;
+    margin-bottom: 20px;
+}
+
+.siliconflow-extension-settings .extension-title {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 10px;
+}
+
+.siliconflow-extension-settings .extension-title h3 {
+    margin: 0;
+    color: var(--SmartThemeBodyColor, #333);
+}
+
+.siliconflow-extension-settings .extension-version {
+    color: var(--SmartThemeBodyColor, #666);
+    font-size: 0.9em;
+}
+
+.siliconflow-extension-settings hr.sysHR {
+    border: 0;
+    border-top: 1px solid var(--SmartThemeBorderColor, #ddd);
+    margin: 15px 0;
+}
+
+/* 插件容器内的样式 */
+.siliconflow-extension-settings .setting-item {
+    margin-bottom: 15px;
+}
+
+.siliconflow-extension-settings .setting-item label {
+    display: block;
+    margin-bottom: 5px;
+    color: var(--SmartThemeBodyColor, #666);
+}
+
+.siliconflow-extension-settings input[type="text"],
+.siliconflow-extension-settings input[type="password"],
+.siliconflow-extension-settings input[type="number"],
+.siliconflow-extension-settings select,
+.siliconflow-extension-settings textarea {
+    width: calc(100% - 20px);
+    padding: 8px;
+    margin: 5px 0;
+    border: 1px solid var(--SmartThemeBorderColor, #444);
+    border-radius: 4px;
+    background-color: var(--SmartThemeBlurTintColor);
+    color: var(--SmartThemeBodyColor);
+}
+
+.siliconflow-extension-settings input[type="range"] {
+    width: 200px;
+    margin-right: 10px;
+}
+
+.siliconflow-extension-settings .menu_button {
+    padding: 8px 15px;
+    margin: 5px;
+    white-space: nowrap;
+}
+
+.siliconflow-extension-settings h4 {
+    margin-top: 20px;
+    margin-bottom: 10px;
+    color: var(--SmartThemeBodyColor, #333);
+}
+
+.siliconflow-extension-settings small {
+    display: block;
+    color: var(--SmartThemeBodyColor, #888);
+    font-size: 0.85em;
+    margin-top: 5px;
+}
+
+#connection_status {
+    margin-left: 10px;
+    font-weight: bold;
+}
+
+#tts_output {
+    margin-top: 10px;
+    padding: 10px;
+    background-color: var(--SmartThemeBlurTintColor);
+    border-radius: 4px;
+}
+
+.button-group {
+    display: flex;
+    gap: 10px;
+    align-items: center;
+}
+
+/* inline-drawer 在插件内的样式 */
+.siliconflow-extension-settings .inline-drawer {
+    margin-bottom: 10px;
+    border: 1px solid var(--SmartThemeBorderColor, #e0e0e0);
+    border-radius: 6px;
+    overflow: hidden;
+}
+
+.siliconflow-extension-settings .inline-drawer-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 10px 15px;
+    background-color: var(--SmartThemeBlurTintColor);
+    cursor: pointer;
+    transition: background-color 0.2s;
+}
+
+.siliconflow-extension-settings .inline-drawer-header:hover {
+    background-color: var(--SmartThemeHoverColor, #e9ecef);
+}
+
+.siliconflow-extension-settings .inline-drawer-content {
+    display: none;
+    padding: 15px;
+    /* 不设置背景色，继承主题 */
+    border-top: 1px solid var(--SmartThemeBorderColor, #444);
+}
+
+.siliconflow-extension-settings .inline-drawer-icon {
+    transition: transform 0.3s;
+}
+
+.siliconflow-extension-settings .inline-drawer-icon.down {
+    transform: rotate(180deg);
+}
+
+/* 子分区样式 */
+.siliconflow-extension-settings .sub-section {
+    margin-top: 20px;
+    padding-top: 15px;
+    border-top: 1px solid var(--SmartThemeBorderColor, #e0e0e0);
+}
+
+.siliconflow-extension-settings .sub-section h4 {
+    margin-top: 0;
+    margin-bottom: 10px;
+    color: var(--SmartThemeBodyColor, #495057);
+    font-size: 1.1em;
+}
+/* ========== TTS 更多菜单（方案A） ========== */
+.tts-more {
+  opacity: 0.85;
+}
+.tts-more:hover {
+  opacity: 1;
+}
+
+.tts-more-menu {
+  position: absolute;
+  z-index: 99999;
+  min-width: 190px;
+  background: var(--SmartThemeBlurTintColor);
+  border: 1px solid var(--SmartThemeBorderColor, #444);
+  border-radius: 8px;
+  box-shadow: 0 6px 24px rgba(0,0,0,0.25);
+  padding: 6px;
+}
+
+.tts-more-item {
+  padding: 8px 10px;
+  border-radius: 6px;
+  cursor: pointer;
+  user-select: none;
+  color: var(--SmartThemeBodyColor);
+}
+.tts-more-item:hover {
+  background: var(--SmartThemeHoverColor, rgba(255,255,255,0.08));
+}
+
+.tts-more-sep {
+  height: 1px;
+  margin: 6px 4px;
+  background: var(--SmartThemeBorderColor, #444);
+  opacity: 0.7;
+}
+
+/* ========== 本对话提取规则弹窗 ========== */
+.tts-extract-modal-backdrop {
+  position: fixed;
+  z-index: 100000;
+  left: 0;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0,0,0,0.45);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.tts-extract-modal {
+  width: min(720px, calc(100vw - 28px));
+  max-height: calc(100vh - 40px);
+  overflow: auto;
+  background: var(--SmartThemeBlurTintColor);
+  border: 1px solid var(--SmartThemeBorderColor, #444);
+  border-radius: 12px;
+  box-shadow: 0 10px 40px rgba(0,0,0,0.35);
+  padding: 12px;
+}
+
+.tts-extract-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  padding: 6px 6px 10px 6px;
+  border-bottom: 1px solid var(--SmartThemeBorderColor, #444);
+}
+
+.tts-extract-title {
+  font-weight: 700;
+  color: var(--SmartThemeBodyColor);
+}
+
+.tts-extract-close {
+  width: 28px;
+  height: 28px;
+  display: grid;
+  place-items: center;
+  border-radius: 8px;
+  cursor: pointer;
+  user-select: none;
+  color: var(--SmartThemeBodyColor);
+}
+.tts-extract-close:hover {
+  background: var(--SmartThemeHoverColor, rgba(255,255,255,0.08));
+}
+
+.tts-extract-body {
+  padding: 10px 6px;
+}
+
+.tts-extract-row {
+  margin-bottom: 12px;
+}
+
+.tts-extract-row label {
+  display: block;
+  margin-bottom: 6px;
+  color: var(--SmartThemeBodyColor, #ccc);
+}
+
+.tts-extract-row input,
+.tts-extract-row select,
+.tts-extract-row textarea {
+  width: 100%;
+  padding: 8px;
+  border-radius: 8px;
+  border: 1px solid var(--SmartThemeBorderColor, #444);
+  background: var(--SmartThemeBlurTintColor);
+  color: var(--SmartThemeBodyColor);
+}
+
+.tts-extract-inline label {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin: 0;
+}
+
+.tts-extract-hint {
+  margin-top: 6px;
+  font-size: 12px;
+  opacity: 0.85;
+}
+
+.tts-extract-preview-label {
+  margin-top: 8px;
+  font-size: 12px;
+  opacity: 0.9;
+}
+
+.tts-extract-preview-out {
+  margin-top: 6px;
+  padding: 10px;
+  border-radius: 10px;
+  border: 1px dashed var(--SmartThemeBorderColor, #444);
+  white-space: pre-wrap;
+  word-break: break-word;
+  opacity: 0.95;
+}
+
+.tts-extract-footer {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 6px 6px 6px;
+  border-top: 1px solid var(--SmartThemeBorderColor, #444);
+}
